@@ -2,17 +2,23 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+import databases
 
 class UserInterface():
 
     def __init__(self):
+        pass
+        
+    def setRoot(self):
         self.root = tk.Tk()
         self.root.title('Quality Books tietokantasovellus')
         self.root.geometry('800x600')
+        
         self.frame = LabelFrame(self.root)
         self.frame.grid(row=0, column = 0, sticky = W+E+N+S, padx=10,pady=10)
+        
         self.frame2 = LabelFrame(self.root)
-        self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)    
+        self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
     def MainLoop(self):
         self.root.mainloop()
@@ -35,6 +41,11 @@ class UserInterface():
         
         messagebox.showinfo("About", "© 2021 Petri Turpeinen.  All rights reserved.")
 
+    def send_login_info(self):
+        data = databases.Databases()
+        
+        data.connect_to_database(self.user_name_var.get(), self.user_password_var.get())
+      
     def create_menu(self):
 
         #MENU
@@ -55,23 +66,26 @@ class UserInterface():
 
     def login(self):
 
-        self.remove_widgets()           
+        self.user_name_var = StringVar(self.root)
+        self.user_password_var = StringVar(self.root)     
+        
+        self.remove_widgets()
 
         #User login to the sql database
         
         username_label = tk.Label(self.frame, text="Käyttäjätunnus:")
         username_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
 
-        username_entry = tk.Entry(self.frame)
+        username_entry = tk.Entry(self.frame, textvariable = self.user_name_var)
         username_entry.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
 
         password_label = tk.Label(self.frame, text="Salasana:")
         password_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
 
-        password_entry = tk.Entry(self.frame, show="*")
+        password_entry = tk.Entry(self.frame, show="*", textvariable = self.user_password_var)
         password_entry.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
 
-        ok_button = tk.Button(self.frame, text="Kirjaudu sisään")
+        ok_button = tk.Button(self.frame, text="Kirjaudu sisään",command=self.send_login_info)
         ok_button.grid(column=0, row=2, sticky=tk.E, padx=5, pady=5)
 
     def add_modify_update(self):
