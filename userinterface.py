@@ -35,6 +35,9 @@ class UserInterface():
 
         self.frame2.grid_forget()
 
+    def error_messagebox(self, message):
+        messagebox.showinfo("Error Message", message)
+
     def showinfo_about(self):
         
         #ABOUT
