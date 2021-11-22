@@ -47,11 +47,28 @@ class UserInterface():
     def send_login_info(self):
         data = databases.Databases()
         
-        data.connect_to_database(self.user_name_var.get(), self.user_password_var.get())
-      
-    def create_menu(self):
+        if data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()) == True:
+            self.empty_menu()
+            self.create_menu()        
+    
+    def login_menu(self):
 
-        #MENU
+        #User menu before logged in
+
+        menubar = Menu(self.root)
+        filemenu = Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Login", command=self.login)
+
+        filemenu.add_command(label="Exit", command=self.root.destroy)
+        menubar.add_cascade(label="File", menu=filemenu)
+        helpmenu = Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="About", command=self.showinfo_about)
+        menubar.add_cascade(label="Help", menu=helpmenu)
+        self.root.config(menu=menubar)
+      
+    def create_menu(self): 
+    
+        #User menu after logged in to the database
 
         menubar = Menu(self.root)
         filemenu = Menu(menubar, tearoff=0)
@@ -66,6 +83,10 @@ class UserInterface():
         helpmenu.add_command(label="About", command=self.showinfo_about)
         menubar.add_cascade(label="Help", menu=helpmenu)
         self.root.config(menu=menubar)
+
+    def empty_menu(self):
+        self.menubar = Menu(self.root)
+        self.root.config(menu=self.menubar)
 
     def login(self):
 
