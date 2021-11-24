@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from tabulate import tabulate, tabulate_formats
+from tksheet import Sheet
+import tksheet
 import databases
 
 class UserInterface():
@@ -36,6 +39,8 @@ class UserInterface():
         self.frame2.grid_forget()
 
     def error_messagebox(self, message):
+        #Generic error message with a parameter
+
         messagebox.showinfo("Error Message", message)
 
     def showinfo_about(self):
@@ -45,11 +50,14 @@ class UserInterface():
         messagebox.showinfo("About", "© 2021 Petri Turpeinen.  All rights reserved.")
 
     def send_login_info(self):
-        data = databases.Databases()
+        self.data = databases.Databases()
         
-        if data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()) == True:
+        if self.data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()):
             self.empty_menu()
-            self.create_menu()        
+            self.full_menu()
+        else:
+            #only for testing
+            print("something went wrong while logging")        
     
     def login_menu(self):
 
@@ -66,7 +74,7 @@ class UserInterface():
         menubar.add_cascade(label="Help", menu=helpmenu)
         self.root.config(menu=menubar)
       
-    def create_menu(self): 
+    def full_menu(self): 
     
         #User menu after logged in to the database
 
@@ -83,6 +91,54 @@ class UserInterface():
         helpmenu.add_command(label="About", command=self.showinfo_about)
         menubar.add_cascade(label="Help", menu=helpmenu)
         self.root.config(menu=menubar)
+    
+    def queries_menu(self):
+
+        top = tk.Tk()
+        top.title('Kyselyn tulos')     
+        top.grid_columnconfigure(0, weight = 1)
+        top.grid_rowconfigure(0, weight = 1)
+        frame = tk.Frame(top)
+        frame.grid_columnconfigure(0,weight=1)
+        frame.grid_rowconfigure(0,weight=1)     
+  
+        table = self.data.query_from_database()
+
+        sheet = tksheet.Sheet(top)
+
+        sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
+
+        sheet.enable_bindings(("single_select",
+
+                       "row_select",
+
+                       "column_width_resize",
+
+                       "arrowkeys",
+
+                       "right_click_popup_menu",
+
+                       "rc_select",
+
+                       "rc_insert_row",
+
+                       "rc_delete_row",
+
+                       "copy",
+
+                       "cut",
+
+                       "paste",
+
+                       "delete",
+
+                       "undo",
+
+                       "edit_cell"))
+
+        sheet.grid(row = 0, column = 0, sticky = "nswe") 
+  
+        top.mainloop()
 
     def empty_menu(self):
         self.menubar = Menu(self.root)
@@ -203,101 +259,70 @@ class UserInterface():
 
         self.remove_widgets()          
 
-        tkvar = StringVar(self.root)
-        tkvar2 = StringVar(self.root)
-        tkvar3 = StringVar(self.root)
+        #tkvar = StringVar(self.root)
+        #tkvar2 = StringVar(self.root)
+        #tkvar3 = StringVar(self.root)
 
         #QUERY FORMS
+                
+        #options_categories2_criteria = [ "=",">","<",">=","<="]      
 
-        options_categories = [ "Isbn","Kategoria","Kielet","Kustantaja","Kuntoluokka","Lisätiedot","Nimeke","Painoasu","Tekijä"]
-        options_categories2 = [ "Hinta","Julkaisuvuosi","Kappalemäärä"]
-        options_categories2_criteria = [ "=",">","<",">=","<="]
+        
+        optionmenu_title_label = tk.Label(self.frame, text="Nimeke:")
+        optionmenu_title_label.grid(row=0,column=0, padx=(5,5),pady=0)
 
-        tkvar.set('Nimeke')
-        optionmenu_category = ttk.OptionMenu(self.frame,tkvar,options_categories[6], *options_categories)
-        optionmenu_category.grid(row=0,column=0, padx=(5,5),pady=0)    
+        optionmenu_author_label = tk.Label(self.frame, text="Tekijä:")
+        optionmenu_author_label.grid(row=1,column=0, padx=(5,5),pady=0)
 
-        tkvar2.set('hinta')
-        optionmenu_category2 = ttk.OptionMenu(self.frame,tkvar2,options_categories2[0], *options_categories2)
-        optionmenu_category2.grid(row=1,column=0, padx=(5,5),pady=0)
+        optionmenu_category_label = tk.Label(self.frame, text="Kategoria:")
+        optionmenu_category_label.grid(row=2,column=0, padx=(5,5),pady=0)
 
-        tkvar3.set('=')
-        optionmenu_category2_criteria = ttk.OptionMenu(self.frame,tkvar3,options_categories2_criteria[0], *options_categories2_criteria)
-        optionmenu_category2_criteria.grid(row=1,column=1, padx=(5,5),pady=0)
+        optionmenu_ISBN_label = tk.Label(self.frame, text="ISBN:")
+        optionmenu_ISBN_label.grid(row=3,column=0, padx=(5,5),pady=0)
+
+        optionmenu_price_label = tk.Label(self.frame, text="Hinta:")
+        optionmenu_price_label.grid(row=4,column=0, padx=(5,5),pady=0)
 
         options_label_startdate = tk.Label(self.frame, text="Alkupäivämäärä:")
-        options_label_startdate.grid(row=2, column=0, padx=5, pady=5)
+        options_label_startdate.grid(row=5, column=0, padx=5, pady=5)
 
         options_label_enddate = tk.Label(self.frame, text="Loppupäivämäärä:")
-        options_label_enddate.grid(row=3, column=0, padx=5,pady=5)    
+        options_label_enddate.grid(row=6, column=0, padx=5,pady=5)         
 
-        options_entry_categories_string = tk.Entry(self.frame, width=15)
-        options_entry_categories_string.grid(row=0, column=2)
+        #tkvar3.set('=')
+        #optionmenu_category2_criteria = ttk.OptionMenu(self.frame,tkvar3,options_categories2_criteria[0], *options_categories2_criteria)
+        #optionmenu_category2_criteria.grid(row=1,column=1, padx=(5,5),pady=0)
+   
+        optionmenu_title_entry = tk.Entry(self.frame, width=15)
+        optionmenu_title_entry.grid(row=0, column=1)
 
-        options_entry_categories_int = tk.Entry(self.frame, width=15)
-        options_entry_categories_int.grid(row=1, column=2)
+        optionmenu_author_entry = tk.Entry(self.frame, width=15)
+        optionmenu_author_entry.grid(row=1, column=1)
 
-        options_entry_startdate = tk.Entry(self.frame, width=15)
-        options_entry_startdate.grid(row=2, column=2)
+        optionmenu_category_entry = tk.Entry(self.frame, width=15)
+        optionmenu_category_entry.grid(row=2, column=1)
 
-        options_entry_enddate = tk.Entry(self.frame, width=15)
-        options_entry_enddate.grid(row=3, column=2)
+        optionmenu_ISBN_entry = tk.Entry(self.frame, width=15)
+        optionmenu_ISBN_entry.grid(row=3, column=1)
 
-        options_search_button = tk.Button(self.frame, text="Hae tiedot")
-        options_search_button.grid(row=3, column=3, padx=(5,5))
+        optionmenu_price_entry = tk.Entry(self.frame, width=15)
+        optionmenu_price_entry.grid(row=4, column=1)
 
-        options_checkbuttons_label = tk.Label(self.frame, text="Sarakkeet:")
-        options_checkbuttons_label.grid(row = 4, column = 0,ipadx = 5, pady=10)
+        optionmenu_startdate_entry = tk.Entry(self.frame, width=15)
+        optionmenu_startdate_entry.grid(row=5, column=1)
+
+        optionmenu_enddate_entry = tk.Entry(self.frame, width=15)
+        optionmenu_enddate_entry.grid(row=6, column=1)
+
+        options_search_button = tk.Button(self.frame, text="Hae tiedot", command=self.queries_menu)
+        options_search_button.grid(row=6, column=2, padx=(5,5))     
 
         #CHECKBUTTONS
 
-        options_checkbutton1 = Checkbutton(self.frame, text="tekijä", onvalue = 1, offvalue = 0)
-        options_checkbutton1.select()
-        options_checkbutton1.grid(row=5, column=0, padx=(5,5), pady=5)
-
-        options_checkbutton2 = Checkbutton(self.frame, text="isbn", onvalue = 1, offvalue = 0)
-        options_checkbutton2.select()
-        options_checkbutton2.grid(row=5, column=1, padx=(5,5), pady=5)
-
-        options_checkbutton3 = Checkbutton(self.frame, text="kategoria", onvalue = 1, offvalue = 0)
-        options_checkbutton3.select()
-        options_checkbutton3.grid(row=5, column=2, padx=(30,5), pady=5)
-
-        options_checkbutton4 = Checkbutton(self.frame, text="kustantaja", onvalue = 1, offvalue = 0)
-        options_checkbutton4.select()
-        options_checkbutton4.grid(row=5, column=3, padx=(30,5), pady=5)
-
-        options_checkbutton5 = Checkbutton(self.frame, text="kielet", onvalue = 1, offvalue = 0)
-        options_checkbutton5.select()
-        options_checkbutton5.grid(row=6, column=0, padx=(5,5), pady=5)
-
-        options_checkbutton6 = Checkbutton(self.frame, text="julkaisuvuosi", onvalue = 1, offvalue = 0)
-        options_checkbutton6.select()
-        options_checkbutton6.grid(row=6, column=1, padx=(50,5), pady=5)
-
-        options_checkbutton7 = Checkbutton(self.frame, text="Nimeke", onvalue = 1, offvalue = 0)
-        options_checkbutton7.select()
-        options_checkbutton7.grid(row=6, column=2, padx=(22,5), pady=5)   
-
-        options_checkbutton8 = Checkbutton(self.frame, text="painoasu", onvalue = 1, offvalue = 0)
-        options_checkbutton8.select()
-        options_checkbutton8.grid(row=6, column=3, padx=(20,5), pady=5)
-
-        options_checkbutton9 = Checkbutton(self.frame, text="kuntoluokka", onvalue = 1, offvalue = 0)
-        options_checkbutton9.select()
-        options_checkbutton9.grid(row=7, column=0, padx=(40,5),pady=5)
-
-        options_checkbutton10 = Checkbutton(self.frame, text="kappalemäärä", onvalue = 1, offvalue = 0)
-        options_checkbutton10.select()
-        options_checkbutton10.grid(row=7, column=1, padx=(55,5), pady=5)
-
-        options_checkbutton11 = Checkbutton(self.frame, text="lisätiedot", onvalue = 1, offvalue = 0)
-        options_checkbutton11.select()
-        options_checkbutton11.grid(row=7, column=2, padx=(30,5), pady=5)
-
-        options_checkbutton12 = Checkbutton(self.frame, text="hinta", onvalue = 1, offvalue = 0)
-        options_checkbutton12.select()
-        options_checkbutton12.grid(row=7, column=3, padx=(0,5), pady=5)
+        # options_checkbutton1 = Checkbutton(self.frame, text="tekijä", onvalue = 1, offvalue = 0)
+        # options_checkbutton1.select()
+        # options_checkbutton1.grid(row=5, column=0, padx=(5,5), pady=5)
+     
 
     def payment_transactions(self):
 
