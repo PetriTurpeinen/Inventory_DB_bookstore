@@ -9,10 +9,12 @@ load_dotenv()
 class Databases():
 
     def __init__(self):
+        #Instance of UI class
         self.UI = userinterface.UserInterface()
         
 
-    def connect_to_database(self,username,userpassword):        
+    def connect_to_database(self,username,userpassword):
+        #Connection to postgresql database and login check     
         try:            
             self.conn = pg2.connect(database=os.environ["DB_DATABASE"], user=os.environ["DB_USER"], password=os.environ["DB_PASSWORD"])
             self.cur = self.conn.cursor()            
@@ -33,7 +35,7 @@ class Databases():
             return True           
 
     def query_from_database(self):
-
+        # A test query to get books from the database
         with self.conn:
 
             self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'kirjat'")

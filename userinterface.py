@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from tabulate import tabulate, tabulate_formats
-from tksheet import Sheet
 import tksheet
 import databases
 
@@ -13,6 +11,7 @@ class UserInterface():
         pass
         
     def setRoot(self):
+        #Initiliaze UI
         self.root = tk.Tk()
         self.root.title('Quality Books tietokantasovellus')
         self.root.geometry('800x600')
@@ -24,6 +23,7 @@ class UserInterface():
         self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
     def MainLoop(self):
+        #Keep UI running
         self.root.mainloop()
 
     def remove_widgets(self):
@@ -50,6 +50,7 @@ class UserInterface():
         messagebox.showinfo("About", "© 2021 Petri Turpeinen.  All rights reserved.")
 
     def send_login_info(self):
+        #Send login info to the server and compare if it's valid
         self.data = databases.Databases()
         
         if self.data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()):
@@ -93,14 +94,14 @@ class UserInterface():
         self.root.config(menu=menubar)
     
     def queries_menu(self):
-
+        #Pop menu for queries
         top = tk.Tk()
         top.title('Kyselyn tulos')     
         top.grid_columnconfigure(0, weight = 1)
         top.grid_rowconfigure(0, weight = 1)
         frame = tk.Frame(top)
         frame.grid_columnconfigure(0,weight=1)
-        frame.grid_rowconfigure(0,weight=1)     
+        frame.grid_rowconfigure(0,weight=1)             
   
         table = self.data.query_from_database()
 
@@ -141,17 +142,17 @@ class UserInterface():
         top.mainloop()
 
     def empty_menu(self):
+        #Clear UI
         self.menubar = Menu(self.root)
         self.root.config(menu=self.menubar)
 
     def login(self):
+        #User login UI to the sql database
 
         self.user_name_var = StringVar(self.root)
         self.user_password_var = StringVar(self.root)     
         
-        self.remove_widgets()
-
-        #User login to the sql database
+        self.remove_widgets()        
         
         username_label = tk.Label(self.frame, text="Käyttäjätunnus:")
         username_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
@@ -170,9 +171,9 @@ class UserInterface():
 
     def add_modify_update(self):
 
-        self.remove_widgets()    
-      
-       #Form to add/remove/modify titles
+        #Form to add/remove/modify titles
+
+        self.remove_widgets()         
 
         price_label = tk.Label(self.frame, text="Hinta:")
         price_label.grid(row=0, column = 0, sticky=tk.W, padx=5, pady=5)
@@ -257,6 +258,8 @@ class UserInterface():
 
     def queries(self):
 
+        #Query UI for the book database
+
         self.remove_widgets()          
 
         #tkvar = StringVar(self.root)
@@ -325,10 +328,9 @@ class UserInterface():
      
 
     def payment_transactions(self):
-
-        self.remove_widgets()
-
         #Add payment transactions
+
+        self.remove_widgets()        
   
         self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
