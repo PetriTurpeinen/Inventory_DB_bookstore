@@ -7,7 +7,8 @@ import databases
 
 class UserInterface():
 
-    def __init__(self):
+    def __init__(self):        
+        
         pass
         
     def setRoot(self):
@@ -51,14 +52,14 @@ class UserInterface():
 
     def send_login_info(self):
         #Send login info to the server and compare if it's valid
-        self.data = databases.Databases()
+        self.data = databases.Databases()        
         
         if self.data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()):
             self.empty_menu()
             self.full_menu()
         else:
             #only for testing
-            print("something went wrong while logging")        
+            print("something went wrong while logging") 
     
     def login_menu(self):
 
@@ -93,7 +94,8 @@ class UserInterface():
         menubar.add_cascade(label="Help", menu=helpmenu)
         self.root.config(menu=menubar)
     
-    def queries_menu(self):
+    def queries_menu(self):        
+
         #Pop menu for queries
         top = tk.Tk()
         top.title('Kyselyn tulos')     
@@ -103,7 +105,7 @@ class UserInterface():
         frame.grid_columnconfigure(0,weight=1)
         frame.grid_rowconfigure(0,weight=1)             
   
-        table = self.data.query_from_database()
+        table = self.data.query_from_database(self.tkTtitle.get(), self.tkAuthor.get(), self.tkCategory.get(), self.tkISBN.get(),self.tkPrice.get())
 
         sheet = tksheet.Sheet(top)
 
@@ -262,9 +264,11 @@ class UserInterface():
 
         self.remove_widgets()          
 
-        #tkvar = StringVar(self.root)
-        #tkvar2 = StringVar(self.root)
-        #tkvar3 = StringVar(self.root)
+        self.tkTtitle = StringVar(self.root)
+        self.tkAuthor = StringVar(self.root)
+        self.tkCategory = StringVar(self.root)
+        self.tkISBN = StringVar(self.root)
+        self.tkPrice = StringVar(self.root)
 
         #QUERY FORMS
                 
@@ -296,19 +300,19 @@ class UserInterface():
         #optionmenu_category2_criteria = ttk.OptionMenu(self.frame,tkvar3,options_categories2_criteria[0], *options_categories2_criteria)
         #optionmenu_category2_criteria.grid(row=1,column=1, padx=(5,5),pady=0)
    
-        optionmenu_title_entry = tk.Entry(self.frame, width=15)
+        optionmenu_title_entry = tk.Entry(self.frame, width=15, textvariable=self.tkTtitle)
         optionmenu_title_entry.grid(row=0, column=1)
 
-        optionmenu_author_entry = tk.Entry(self.frame, width=15)
+        optionmenu_author_entry = tk.Entry(self.frame, width=15, textvariable=self.tkAuthor)
         optionmenu_author_entry.grid(row=1, column=1)
 
-        optionmenu_category_entry = tk.Entry(self.frame, width=15)
+        optionmenu_category_entry = tk.Entry(self.frame, width=15, textvariable=self.tkCategory)
         optionmenu_category_entry.grid(row=2, column=1)
 
-        optionmenu_ISBN_entry = tk.Entry(self.frame, width=15)
+        optionmenu_ISBN_entry = tk.Entry(self.frame, width=15, textvariable=self.tkISBN)
         optionmenu_ISBN_entry.grid(row=3, column=1)
 
-        optionmenu_price_entry = tk.Entry(self.frame, width=15)
+        optionmenu_price_entry = tk.Entry(self.frame, width=15, textvariable=self.tkPrice)
         optionmenu_price_entry.grid(row=4, column=1)
 
         optionmenu_startdate_entry = tk.Entry(self.frame, width=15)

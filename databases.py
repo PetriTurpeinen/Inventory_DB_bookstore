@@ -34,10 +34,15 @@ class Databases():
             print(self.UI.error_messagebox("You have succesfully logged in!"))           
             return True           
 
-    def query_from_database(self):
-        # A test query to get books from the database
-        with self.conn:
+    def query_from_database(self, title, author, category, isbn, price):
+        # A test query to get books from the database        
+        title = "%" + title + "%"
+        author = "%" + author + "%"
+        category = "%" + category + "%"
+        isbn = "%" + isbn + "%"        
 
+        with self.conn:
+            #Add column names to the query
             self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'kirjat'")
 
             column_names = self.cur.fetchall()
@@ -50,9 +55,10 @@ class Databases():
             
             data_tuple = (*columns_list,)
 
-            print(data_tuple)          
+            #print(data_tuple)          
 
-            self.cur.execute("SELECT * FROM kirjat")
+            #self.cur.execute("SELECT * FROM kirjat")
+            self.cur.execute("SELECT * FROM kirjat WHERE nimeke LIKE %s AND tekija LIKE %s AND kategoria LIKE %s AND isbn LIKE %s AND hinta = %s", (title,author,category,isbn,price));
 
             data_queries = self.cur.fetchall()
             
