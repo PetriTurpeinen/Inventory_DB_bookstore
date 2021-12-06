@@ -4,12 +4,13 @@ from tkinter import ttk
 from tkinter import messagebox
 import tksheet
 import databases
+import uimethods
 
 class UserInterface():
 
     def __init__(self):        
         
-        pass
+        self.ui_method = uimethods.uiMethods()   
         
     def setRoot(self):
         #Initiliaze UI
@@ -23,38 +24,19 @@ class UserInterface():
         self.frame2 = LabelFrame(self.root)
         self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
+        self.frame3 = LabelFrame(self.root)
+        self.frame3.grid(row = 3, column = 0, sticky = W+E+N+S,padx=10, pady=10)
+
     def MainLoop(self):
         #Keep UI running
-        self.root.mainloop()
-
-    def remove_widgets(self):
-
-        #Remove widgets so objects aren't placed on top of each others 
-
-        for widget in self.frame.winfo_children():
-            widget.destroy()
-
-        for widget in self.frame2.winfo_children():
-            widget.destroy()
-
-        self.frame2.grid_forget()
-
-    def error_messagebox(self, message):
-        #Generic error message with a parameter
-
-        messagebox.showinfo("Error Message", message)
-
-    def showinfo_about(self):
-        
-        #ABOUT
-        
-        messagebox.showinfo("About", "© 2021 Petri Turpeinen.  All rights reserved.")
+        self.root.mainloop()     
+    
 
     def send_login_info(self):
         #Send login info to the server and compare if it's valid
-        self.data = databases.Databases()        
+        self.data = databases.Databases()                
         
-        if self.data.connect_to_database(self.user_name_var.get(), self.user_password_var.get()):
+        if self.data.is_admin(self.user_name_var.get(), self.user_password_var.get()):
             self.empty_menu()
             self.full_menu()
         else:
@@ -72,7 +54,7 @@ class UserInterface():
         filemenu.add_command(label="Exit", command=self.root.destroy)
         menubar.add_cascade(label="File", menu=filemenu)
         helpmenu = Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="About", command=self.showinfo_about)
+        helpmenu.add_command(label="About", command=self.ui_method.showinfo_about)
         menubar.add_cascade(label="Help", menu=helpmenu)
         self.root.config(menu=menubar)
       
@@ -90,12 +72,9 @@ class UserInterface():
         filemenu.add_command(label="Exit", command=self.root.destroy)
         menubar.add_cascade(label="File", menu=filemenu)
         helpmenu = Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="About", command=self.showinfo_about)
+        helpmenu.add_command(label="About", command=self.ui_method.showinfo_about)
         menubar.add_cascade(label="Help", menu=helpmenu)
-        self.root.config(menu=menubar)
-
-    def send_form_to_database(self):
-        self.data.add_to_database(self.tkAddTitle.get(),self.tkAddAuthor.get(),self.tkAddISBN.get(),self.tkAddCategory.get(),self.tkAddPublisher.get(),self.tkAddLanguages.get(),self.tkAddPublishYear.get(),self.tkAddEdition.get(),self.tkAddPages.get(),self.addTypography.get(),self.addCondition.get(),self.addAmount.get(),self.addExtraInformation.get(),self.tkAddPrice.get())
+        self.root.config(menu=menubar)   
         
     def queries_menu(self):        
 
@@ -146,8 +125,53 @@ class UserInterface():
   
         top.mainloop()
     
-    def send_transactions_to_database(self):        
-        self.data.add_payment_to_database(self.tkPayTitleId.get(), self.tkPayPrice.get(), self.tkPayPostage.get(), self.tkPayLocation.get(), self.tkPayDate.get())
+    def transactions_menu (self):
+
+        top = tk.Tk()
+        top.title('Kyselyn tulos')     
+        top.grid_columnconfigure(0, weight = 1)
+        top.grid_rowconfigure(0, weight = 1)
+        frame = tk.Frame(top)
+        frame.grid_columnconfigure(0,weight=1)
+        frame.grid_rowconfigure(0,weight=1)             
+  
+        table = self.data.get_payment_transactions(self.tkPayStartDate.get(),self.tkPayEndDate.get())
+
+        sheet = tksheet.Sheet(top)
+
+        sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
+
+        sheet.enable_bindings(("single_select",
+
+                       "row_select",
+
+                       "column_width_resize",
+
+                       "arrowkeys",
+
+                       "right_click_popup_menu",
+
+                       "rc_select",
+
+                       "rc_insert_row",
+
+                       "rc_delete_row",
+
+                       "copy",
+
+                       "cut",
+
+                       "paste",
+
+                       "delete",
+
+                       "undo",
+
+                       "edit_cell"))
+
+        sheet.grid(row = 0, column = 0, sticky = "nswe") 
+  
+        top.mainloop()        
 
     def empty_menu(self):
         #Clear UI
@@ -160,7 +184,7 @@ class UserInterface():
         self.user_name_var = StringVar(self.root)
         self.user_password_var = StringVar(self.root)     
         
-        self.remove_widgets()        
+        self.ui_method.remove_widgets(self.frame, self.frame2, self.frame3)        
         
         username_label = tk.Label(self.frame, text="Käyttäjätunnus:")
         username_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
@@ -195,8 +219,12 @@ class UserInterface():
         self.addAmount = StringVar(self.root)
         self.addExtraInformation = StringVar(self.root)             
         self.tkAddPrice = StringVar(self.root)
+        self.removetitle = StringVar(self.root)
+        
 
-        self.remove_widgets()         
+        self.ui_method.remove_widgets(self.frame, self.frame2, self.frame3)   
+
+        self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)         
 
         title_label = tk.Label(self.frame, text="Nimeke:")
         title_label.grid(row=0, column = 0, sticky=tk.W, padx=5, pady=5)
@@ -282,20 +310,28 @@ class UserInterface():
         price_entry = tk.Entry(self.frame, textvariable=self.tkAddPrice)
         price_entry.grid(row=13, column=1, sticky=tk.E, padx=5, pady=5)
 
-        add_button = tk.Button(self.frame, text="Lisää nimeke", command=self.send_form_to_database)
-        add_button.grid(row=13, column=2, sticky=tk.E, padx=5, pady=5)
-
-        remove_button = tk.Button(self.frame, text="Poista nimeke")
-        remove_button.grid(row=13, column=3, sticky=tk.E, padx=5, pady=5)
+        add_button = tk.Button(self.frame, text="Lisää nimeke", command=lambda: self.data.add_to_database(self.tkAddTitle.get(),self.tkAddAuthor.get(),self.tkAddISBN.get(),self.tkAddCategory.get(),self.tkAddPublisher.get(),self.tkAddLanguages.get(),self.tkAddPublishYear.get(),self.tkAddEdition.get(),self.tkAddPages.get(),self.addTypography.get(),self.addCondition.get(),self.addAmount.get(),self.addExtraInformation.get(),self.tkAddPrice.get()))
+        add_button.grid(row=13, column=2, sticky=tk.E, padx=5, pady=5)        
 
         modify_button = tk.Button(self.frame, text="Muokkaa nimekettä")
-        modify_button.grid(row=13, column=4, sticky=tk.E, padx=5, pady=5)
+        modify_button.grid(row=13, column=3, sticky=tk.E, padx=5, pady=5)
+        
+        #Remove a title entry
+
+        title_id_label = tk.Label(self.frame2, text="Nimeke ID:")
+        title_id_label.grid(row=0, column=0, padx=5, pady=5)
+        
+        title_id_entry = tk.Entry(self.frame2, textvariable=self.removetitle)
+        title_id_entry.grid(row=0, column=1, padx=5,pady=5)
+
+        remove_title_button = tk.Button(self.frame2, text="Poista nimeke", command= lambda: self.data.delete_title_from_books(self.removetitle.get()))
+        remove_title_button.grid(row=0, column=2, sticky=tk.E, padx=5, pady=5)
 
     def queries(self):
 
         #Query UI for the book database
 
-        self.remove_widgets()          
+        self.ui_method.remove_widgets(self.frame, self.frame2, self.frame3)             
 
         self.tkGetTitle = StringVar(self.root)
         self.tkGetAuthor = StringVar(self.root)
@@ -303,11 +339,8 @@ class UserInterface():
         self.tkGetISBN = StringVar(self.root)
         self.tkGetPrice = StringVar(self.root)
 
-        #QUERY FORMS
-                
-        #options_categories2_criteria = [ "=",">","<",">=","<="]      
+        #QUERY FORMS             
 
-        
         optionmenu_title_label = tk.Label(self.frame, text="Nimeke:")
         optionmenu_title_label.grid(row=0,column=0, padx=(5,5),pady=0)
 
@@ -371,11 +404,15 @@ class UserInterface():
         self.tkPayPrice = StringVar(self.root)
         self.tkPayPostage = StringVar(self.root)
         self.tkPayLocation = StringVar(self.root)
-        self.tkPayDate = StringVar(self.root)   
+        self.tkPayDate = StringVar(self.root)
+        self.tkPayStartDate = StringVar(self.root)
+        self.tkPayEndDate = StringVar(self.root)
+        self.tkPayTransactionId = StringVar(self.root)      
 
-        self.remove_widgets()        
+        self.ui_method.remove_widgets(self.frame, self.frame2, self.frame3)       
   
         self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
+        self.frame3.grid(row = 3, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
         title_id_label = tk.Label(self.frame, text="Nimeke id:")
         title_id_label.grid(row=0, column=0, padx=5, pady=5)
@@ -407,32 +444,46 @@ class UserInterface():
         payment_date_entry = tk.Entry(self.frame,textvariable=self.tkPayDate)
         payment_date_entry.grid(row=4, column=1, padx=5,pady=5)
 
-        payment_add_button = tk.Button(self.frame, text="Lisää maksutapahtuma", command=self.send_transactions_to_database)
+        payment_add_button = tk.Button(self.frame, text="Lisää maksutapahtuma", command= lambda: self.data.add_payment_to_database(self.tkPayTitleId.get(), self.tkPayPrice.get(), self.tkPayPostage.get(), self.tkPayLocation.get(), self.tkPayDate.get()))
         payment_add_button.grid(row=4, column=2, padx=5, pady=5)
 
         payment_modify_button = tk.Button(self.frame, text="Muokkaa maksutapahtumaa")
-        payment_modify_button.grid(row=4, column=3, padx=5, pady=5)
-
-        payment_delete_button = tk.Button(self.frame, text="Poista maksutapahtuma")
-        payment_delete_button.grid(row=4, column=4, padx=5, pady=5)
+        payment_modify_button.grid(row=4, column=3, padx=5, pady=5)        
 
         #Get payment transactions
 
         start_date_label = tk.Label(self.frame2, text="Aloitus päivämäärä:")
         start_date_label.grid(row=0, column=0, padx=5, pady=5)
 
-        start_date_id_entry = tk.Entry(self.frame2)
+        start_date_id_entry = tk.Entry(self.frame2, textvariable=self.tkPayStartDate)
         start_date_id_entry.grid(row=0, column=1, padx=5,pady=5)
 
         end_date_label = tk.Label(self.frame2, text="Lopetus päivämäärä:")
         end_date_label.grid(row=1, column=0, padx=5, pady=5)
 
-        end_date_id_entry = tk.Entry(self.frame2)
+        end_date_id_entry = tk.Entry(self.frame2, textvariable=self.tkPayEndDate)
         end_date_id_entry.grid(row=1, column=1, padx=5,pady=5)
 
-        get_payments_button = tk.Button(self.frame2, text="Hae maksutapahtumat")
+        get_payments_button = tk.Button(self.frame2, text="Hae maksutapahtumat", command=self.transactions_menu)
         get_payments_button.grid(row=1, column=2, padx=5, pady=5)
 
+        #Delete payment transactions
+
+        transaction_id_label = tk.Label(self.frame3, text="Maksu ID:")
+        transaction_id_label.grid(row=0, column=0, padx=5, pady=5)
+        
+        transaction_id_entry = tk.Entry(self.frame3,textvariable=self.tkPayTransactionId)
+        transaction_id_entry.grid(row=0, column=1, padx=5,pady=5)
+
+        payment_delete_button = tk.Button(self.frame3, text="Poista maksutapahtuma", command= lambda: self.data.delete_from_payments(self.tkPayTransactionId.get()))
+        payment_delete_button.grid(row=0, column=2, padx=5, pady=5)
+
+        #self.data.delete_from_payments(self.tkPayTransactionId)
+
+
+#command= lambda: action(someNumber))
+
+#command=self.get_transaction_id)
     
         
         

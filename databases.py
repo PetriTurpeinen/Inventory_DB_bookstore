@@ -1,19 +1,21 @@
 import psycopg2 as pg2
-import userinterface
+import uimethods
 import os
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
+message = "You have succesfully logged in!"
+
 class Databases():
 
     def __init__(self):
-        #Instance of UI class
-        self.UI = userinterface.UserInterface()
-        
+        pass
 
-    def connect_to_database(self,username,userpassword):
+      
+
+    def connect_to_database(self):
         #Connection to postgresql database and login check     
         try:            
             self.conn = pg2.connect(database=os.environ["DB_DATABASE"], user=os.environ["DB_USER"], password=os.environ["DB_PASSWORD"])
@@ -22,54 +24,69 @@ class Databases():
         except pg2.OperationalError:
             print(("Connection error"))
         except:
-            print(("Something else went wrong!"))        
+            print(("Something else went wrong!"))
+
+    def is_admin(self,username,userpassword):
+
+        self.connect_to_database()        
         
         self.cur.execute("SELECT admin FROM users WHERE username = %s AND password = %s", (username,userpassword ));
         result = self.cur.fetchone()        
 
         if result is None:
-            print(self.UI.error_messagebox("Login name or password was incorrect"))
+            print(uimethods.uiMethods.info_messagebox("", "Login name or password was incorrect"))
+            self.conn.close()
             return False
         else:
-            print(self.UI.error_messagebox("You have succesfully logged in!"))           
+            print(uimethods.uiMethods.info_messagebox("", "You have succesfully logged in!"))
+            self.conn.close()                       
             return True           
 
     def query_from_database(self, title, author, category, isbn, price):
-        print(title,author,category,isbn,price)
-        # A test query to get books from the database        
+        #print(title,author,category,isbn,price)
+        # A test query to get books from the database
+
+        self.connect_to_database()
+
         title = "%" + title + "%"
         author = "%" + author + "%"
         category = "%" + category + "%"
         isbn = "%" + isbn + "%"
         price = "%" + price + "%"        
 
-        with self.conn:
-            #Add column names to the query
-            self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'kirjat'")
+        
+        #Add column names to the query
+        self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'kirjat'")
 
-            column_names = self.cur.fetchall()
-            print(column_names)
+        column_names = self.cur.fetchall()
+        #print(column_names)
 
-            columns_list = []
+        columns_list = []
 
-            for tup in column_names:
-                columns_list += [ tup[0] ]
-            #Add columns to a tuple so it can be combined with query
-            data_tuple = (*columns_list,)
+        for tup in column_names:
+            columns_list += [ tup[0] ]
+        #Add columns to a tuple so it can be combined with query
+        data_tuple = (*columns_list,)
 
-            #print(data_tuple)         
+        #print(data_tuple)         
 
-            self.cur.execute("SELECT * FROM kirjat WHERE nimeke LIKE %s AND tekija LIKE %s AND kategoria LIKE %s AND isbn LIKE %s AND hinta LIKE %s ORDER BY kirjat_id ASC", (title,author,category,isbn,price));
+        self.cur.execute("SELECT * FROM kirjat WHERE nimeke LIKE %s AND tekija LIKE %s AND kategoria LIKE %s AND isbn LIKE %s AND hinta LIKE %s ORDER BY kirjat_id ASC", (title,author,category,isbn,price));
 
-            data_queries = self.cur.fetchall()
-            #print(data_queries)
-            
-            data_queries.append(data_queries[0])
-            data_queries[0] = data_tuple
+        data_queries = self.cur.fetchall()
+        self.conn.close()
+        #print(data_queries)
+
+        new_data_queries = []
+        new_data_queries.append(data_tuple)
+        for i in range(len(data_queries)):
+            new_data_queries.append(data_queries[i])
+        
+        #data_queries.append(data_queries[0])
+        #data_queries[0] = data_tuple
 
         #print(data)            
         
-        return data_queries
+        return new_data_queries
 
     def add_to_database(self,title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price):
         #title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price
@@ -78,25 +95,97 @@ class Databases():
         #lista = [title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price]
         #print(len(lista))
 
-        
+        self.connect_to_database()      
         
         self.cur.execute("INSERT INTO kirjat (nimeke, tekija, isbn, kategoria, kustantaja, kielet, julkaisuvuosi, painos, sivumaara, painoasu, kuntoluokka, kappalemaara, lisatiedot, hinta) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING kirjat_id;",(title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price));
         #self.cur.execute("INSERT INTO testi(nimi,ika) VALUES(%s, %s) RETURNING testi_id;", (title,author))
         id = self.cur.fetchone()[0]
-        self.conn.commit()    
+        self.conn.commit()
+        self.conn.close()    
 
-        print(self.UI.error_messagebox(f"Title id: {id} was succesfully added to the database!"))
+        print(uimethods.uiMethods.info_messagebox("", f"Title id: {id} was succesfully added to the database!"))
     
     def add_payment_to_database(self, title_id, price, postage, location, date):
+
+        self.connect_to_database()        
 
         self.cur.execute("INSERT INTO maksut (kirjat_id, hinta, toimituskulut, kaupunki, maksupvm) VALUES (%s, %s, %s, %s, %s) RETURNING maksut_id;",(title_id, price, postage, location, date));
 
         id = self.cur.fetchone()[0]
-        self.conn.commit()    
+        self.conn.commit()
+        self.conn.close()    
 
-        print(self.UI.error_messagebox(f"Payment transaction: {id} was succesfully added to the database!"))
+        print(uimethods.uiMethods.info_messagebox("", f"Payment transaction: {id} was succesfully added to the database!"))
+    
+    def get_payment_transactions(self, startdate, enddate):
+        #Get payment transactions from the database based on startdate and enddate
 
-        
+        self.connect_to_database()
+
+        self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'maksut'")
+
+        column_names = self.cur.fetchall()
+        #print(column_names)
+
+        columns_list = []
+
+        for tup in column_names:
+            columns_list += [ tup[0] ]
+            #Add columns to a tuple so it can be combined with query
+        data_tuple = (*columns_list,)
+        #print(data_tuple)
+
+        if startdate == "" and enddate == "":
+            self.cur.execute("SELECT * FROM maksut ORDER BY maksupvm;");
+        elif startdate == "":
+            self.cur.execute("SELECT * FROM maksut WHERE maksupvm::date <= %s ORDER BY maksupvm;",(enddate,));
+        elif enddate == "":
+            self.cur.execute("SELECT * FROM maksut WHERE maksupvm::date >= %s ORDER BY maksupvm;",(startdate,));
+        else:
+            self.cur.execute("SELECT * FROM maksut WHERE maksupvm BETWEEN %s AND %s ORDER BY maksupvm;",(startdate,enddate));
+
+        data_queries = self.cur.fetchall()
+        self.conn.close()
+
+        new_data_queries = []
+        new_data_queries.append(data_tuple)
+        for i in range(len(data_queries)):
+            new_data_queries.append(data_queries[i])
+        #print(new_data_queries)           
+
+        return new_data_queries
+    
+    def delete_from_payments(self, payment_id):
+
+        self.connect_to_database()        
+
+        print(payment_id)
+
+        self.conn = pg2.connect(database=os.environ["DB_DATABASE"], user=os.environ["DB_USER"], password=os.environ["DB_PASSWORD"])
+        self.cur = self.conn.cursor()
+
+        self.cur.execute("DELETE FROM maksut WHERE maksut_id = %s RETURNING maksut_id;",(payment_id,));
+
+        id = self.cur.fetchone()[0]
+        self.conn.commit()
+        self.conn.close()    
+
+        print(uimethods.uiMethods.info_messagebox("", f"Payment transaction: {id} was succesfully deleted from the database"))
+    
+    def delete_title_from_books(self, removebook):
+
+        self.connect_to_database()        
+
+        #print(removebook)
+
+        self.cur.execute("DELETE FROM kirjat WHERE kirjat_id = %s RETURNING kirjat_id;",(removebook,));
+
+        id = self.cur.fetchone()[0]
+        self.conn.commit()
+        self.conn.close()    
+
+        print(uimethods.uiMethods.info_messagebox("", f"Book: {id} was succesfully deleted from the database"))
+
                 
             
         
