@@ -1,25 +1,37 @@
-#import userinterface
+import tkinter as tk
 from tkinter import messagebox
+from tkinter import *
 import databases
 
-class uiMethods():
+class UiMethods():
 
-    def __init__(self):
+    #Testing
+    #def frame(self, uiObject):        
+    #   self.frame = tk.Frame(uiObject)        
 
-        self.data = databases.Databases()  
-    
-    def info_messagebox(self, message):
-        info = "Info"
-        messagebox.showinfo(info, message)
-    
-    def showinfo_about(self):
+    def frames(self):
+        self.frame = LabelFrame(self.window)
+        self.frame.grid(row=0, column = 0, sticky = W+E+N+S, padx=10,pady=10)
         
-        #ABOUT
-        
-        messagebox.showinfo("About", "© 2021 Petri Turpeinen.  All rights reserved.")
+        self.frame2 = LabelFrame(self.window)
+        self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
 
+        self.frame3 = LabelFrame(self.window)
+        self.frame3.grid(row = 3, column = 0, sticky = W+E+N+S,padx=10, pady=10)
+    
+    def send_login_info(self):
+        #Send login info to the server and compare if it's valid
+        self.data = databases.Databases()                
+        
+        if self.data.is_admin(self.user_name_var.get(), self.user_password_var.get()):
+            self.empty_menu()
+            self.full_menu()
+        else:
+            #only for testing
+            print("something went wrong while logging")
+    
     def remove_widgets(self, frame, frame2, frame3):
-    
+        
         #Remove widgets so objects aren't placed on top of each others 
 
         for widget in frame.winfo_children():
@@ -33,3 +45,10 @@ class uiMethods():
 
         frame2.grid_forget()
         frame3.grid_forget()
+    
+    def showinfo_messagebox(self,messagetype, message):
+
+        #Send a messagebox that takes to parameters: Type and Text     
+        
+        messagebox.showinfo(messagetype,message)
+

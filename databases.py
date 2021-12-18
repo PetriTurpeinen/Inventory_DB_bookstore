@@ -24,7 +24,7 @@ class Databases():
         except:
             print(("Something else went wrong!"))
 
-    def is_admin(self,username,userpassword):
+    def is_admin(self,username,userpassword):        
 
         self.connect_to_database()        
         try:
@@ -32,20 +32,19 @@ class Databases():
             result = self.cur.fetchone()        
 
             if result is None:
-                print(uimethods.uiMethods.info_messagebox("Error", "Login name or password was incorrect"))
+                print(uimethods.UiMethods.showinfo_messagebox("","Error", "Login name or password was incorrect"))
                 self.conn.close()
                 return False
             else:
-                print(uimethods.uiMethods.info_messagebox("", "You have succesfully logged in!"))
+                print(uimethods.UiMethods.showinfo_messagebox("","Info", "You have succesfully logged in!"))
                 self.conn.close()                       
                 return True
         except:
-            print(uimethods.uiMethods.info_messagebox("", "Unknown error."))         
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Unknown error."))         
 
     def query_from_database(self, title, author, category, isbn, price):
         #print(title,author,category,isbn,price)
-        # A test query to get books from the database
-
+        # A test query to get books from the database        
         self.connect_to_database()
 
         try:
@@ -89,9 +88,11 @@ class Databases():
             
             return new_data_queries
         except:
-            print(uimethods.uiMethods.info_messagebox("Error", "Something went wrong.")) 
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong.")) 
 
     def add_to_database(self,title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price):
+
+        
         #title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price
         #print(title,author,isbn,category,publisher,languages,publishyear,edition,pages,typography,condition,amount,extrainformation,price)
 
@@ -108,12 +109,12 @@ class Databases():
             self.conn.commit()
             self.conn.close()    
 
-            print(uimethods.uiMethods.info_messagebox("", f"Title id: {id} was succesfully added to the database!"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Title id: {id} was succesfully added to the database!"))
         except:
-            print(uimethods.uiMethods.info_messagebox("", "Something went wrong"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Info", "Something went wrong"))
     
     def add_payment_to_database(self, title_id, price, postage, location, date):
-
+        
         self.connect_to_database()        
         try:
             self.cur.execute("INSERT INTO maksut (kirjat_id, hinta, toimituskulut, kaupunki, maksupvm) VALUES (%s, %s, %s, %s, %s) RETURNING maksut_id;",(title_id, price, postage, location, date));
@@ -121,12 +122,13 @@ class Databases():
             id = self.cur.fetchone()[0]
             self.conn.commit()
             self.conn.close()
+            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully added to the database!"))
         except:
-            print(uimethods.uiMethods.info_messagebox("", "Something went wrong"))
-
-        print(uimethods.uiMethods.info_messagebox("", f"Payment transaction: {id} was succesfully added to the database!"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+        
     
-    def get_payment_transactions(self, startdate, enddate):
+    def get_payment_transactions(self, startdate, enddate):        
+
         #Get payment transactions from the database based on startdate and enddate
 
         self.connect_to_database()
@@ -166,9 +168,10 @@ class Databases():
 
             return new_data_queries
         except:
-            print(uimethods.uiMethods.info_messagebox("", "Something went wrong"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
     
     def delete_from_payments(self, payment_id):
+        
 
         self.connect_to_database()        
 
@@ -178,15 +181,15 @@ class Databases():
             id = self.cur.fetchone()[0]
             self.conn.commit()
             self.conn.close()
-            print(uimethods.uiMethods.info_messagebox("", f"Payment transaction: {id} was succesfully deleted from the database"))            
+            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully deleted from the database"))            
         except pg2.errors.InvalidTextRepresentation:
-            print(uimethods.uiMethods.info_messagebox("Error", f"{payment_id} isn't a numeric value!"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"{payment_id} isn't a numeric value!"))
         except TypeError:
-            print(uimethods.uiMethods.info_messagebox("Error", f"Payment id: {payment_id} was not found from the database."))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"Payment id: {payment_id} was not found from the database."))
         except pg2.errors.NumericValueOutOfRange:
-            print(uimethods.uiMethods.info_messagebox("Error", "Index out of range."))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range."))
         except:
-            print(uimethods.uiMethods.info_messagebox("Error", "Something went wrong"))    
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))    
                    
     
     def delete_title_from_books(self, title_id):
@@ -201,16 +204,13 @@ class Databases():
             self.conn.commit()
             self.conn.close()    
 
-            print(uimethods.uiMethods.info_messagebox("", f"Book: {id} was succesfully deleted from the database"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Title: {id} was succesfully deleted from the database"))
         except pg2.errors.InvalidTextRepresentation:
-            print(uimethods.uiMethods.info_messagebox("Error", f"{title_id} isn't a numeric value!"))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"{title_id} isn't a numeric value!"))
         except TypeError:
-            print(uimethods.uiMethods.info_messagebox("Error", f"Title id: {title_id} was not found from the database."))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"Title id: {title_id} was not found from the database."))
         except pg2.errors.NumericValueOutOfRange:
-            print(uimethods.uiMethods.info_messagebox("Error", "Index out of range."))
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range."))
         except:
-            print(uimethods.uiMethods.info_messagebox("Error", "Something went wrong"))
-
-#TODO:
-#Limit the character length for fields i.e Varchar(50).    
+            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
 
