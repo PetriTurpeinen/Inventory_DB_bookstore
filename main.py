@@ -27,7 +27,6 @@ if __name__ == '__main__':
 #9. Move UI & Menus to different class
 #10. Make proper error messageboxes
 #11. Fix messagebox/database instances for messagebox so it doesn't have to add one useless parameter
-#12. Move self.conn() statements to finally in try-except clause
-#13. Include more type testing in value input for the fields
-#14. Add confirmation for deleting & updating values.
-#15. Add tk string/int values to a list to make it clearer (too many values).
+#12. Include more type testing in value input for the fields
+#13. Add confirmation for deleting & updating values.
+#14. Add tk string/int values to a list to make it clearer (too many values).

@@ -8,10 +8,7 @@ load_dotenv()
 
 message = "You have succesfully logged in!"
 
-class Databases():
-
-    def __init__(self):
-        pass      
+class Databases():         
 
     def connect_to_database(self):
         #Connection to postgresql database and login check     
@@ -32,15 +29,15 @@ class Databases():
             result = self.cur.fetchone()        
 
             if result is None:
-                print(uimethods.UiMethods.showinfo_messagebox("","Error", "Login name or password was incorrect"))
+                uimethods.UiMethods.showinfo_messagebox("","Error", "Login name or password was incorrect")
                 self.conn.close()
                 return False
             else:
-                print(uimethods.UiMethods.showinfo_messagebox("","Info", "You have succesfully logged in!"))
+                uimethods.UiMethods.showinfo_messagebox("","Info", "You have succesfully logged in!")
                 self.conn.close()                       
                 return True
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Unknown error."))         
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Unknown error.")         
 
     def query_from_database(self, title, author, category, isbn, price):
         #print(title,author,category,isbn,price)
@@ -84,7 +81,7 @@ class Databases():
             
             return new_data_queries
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong."))
+            print("Something went wrong.")
         finally:
             self.conn.close() 
 
@@ -105,9 +102,9 @@ class Databases():
             id = self.cur.fetchone()[0]
             self.conn.commit()              
 
-            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Title id: {id} was succesfully added to the database!"))
+            uimethods.UiMethods.showinfo_messagebox("","Info", f"Title id: {id} was succesfully added to the database!")
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Info", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Info", "Something went wrong")
         finally:
             self.conn.close()
     
@@ -134,7 +131,7 @@ class Databases():
             self.cur.execute("SELECT nimeke, tekija, isbn, kategoria, kustantaja, kielet, julkaisuvuosi, painos, sivumaara, painoasu, kuntoluokka, kappalemaara, lisatiedot, hinta FROM kirjat WHERE kirjat_id = %s;", (title_id,));
             old_title_values = self.cur.fetchall()[0]         
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         finally:
             self.conn.close()  
 
@@ -155,7 +152,7 @@ class Databases():
             self.conn.commit()
             self.conn.close()            
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
             self.conn.close()
 
     def delete_title_from_books(self, title_id):
@@ -169,15 +166,15 @@ class Databases():
             id = self.cur.fetchone()[0]
             self.conn.commit()                
 
-            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Title: {id} was succesfully deleted from the database"))
+            uimethods.UiMethods.showinfo_messagebox("","Info", f"Title: {id} was succesfully deleted from the database")
         except pg2.errors.InvalidTextRepresentation:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"{title_id} isn't a numeric value!"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", f"{title_id} isn't a numeric value!")
         except TypeError:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"Title id: {title_id} was not found from the database."))
+            uimethods.UiMethods.showinfo_messagebox("","Error", f"Title id: {title_id} was not found from the database.")
         except pg2.errors.NumericValueOutOfRange:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range."))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range.")
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         finally:
             self.conn.close()
     
@@ -189,9 +186,9 @@ class Databases():
 
             id = self.cur.fetchone()[0]
             self.conn.commit()            
-            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully added to the database!"))
+            uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully added to the database!")
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         self.conn.close()
         
     
@@ -202,42 +199,37 @@ class Databases():
         self.connect_to_database()
 
         try:
-
-            self.cur.execute("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'maksut'")            
-
-            column_names = self.cur.fetchall()
-            #print(column_names)
-
+       
+            columns = ["Nimeke","Hinta","Toimituskulut","Kaupunki","Maksupvm"]
             columns_list = []
 
-            for tup in column_names:
-                columns_list += [ tup[0] ]
-                #Add columns to a tuple so it can be combined with query
+            for name in columns:
+                columns_list += [ name ]
+            #Add columns to a tuple so it can be combined with query
             data_tuple = (*columns_list,)
-            #print(data_tuple)
+            print(data_tuple)
 
             if startdate == "" and enddate == "":
-                self.cur.execute("SELECT * FROM maksut ORDER BY maksupvm;");
+                self.cur.execute("SELECT nimeke, maksut.hinta, toimituskulut, kaupunki, maksupvm FROM maksut INNER JOIN kirjat ON maksut.kirjat_id = kirjat.kirjat_id ORDER BY maksupvm DESC;");
             elif startdate == "":
-                self.cur.execute("SELECT * FROM maksut WHERE maksupvm::date <= %s ORDER BY maksupvm;",(enddate,));
+                self.cur.execute("SELECT nimeke, maksut.hinta, toimituskulut, kaupunki, maksupvm FROM maksut INNER JOIN kirjat ON maksut.kirjat_id = kirjat.kirjat_id WHERE maksupvm::date <= %s ORDER BY maksupvm DESC;",(enddate,));
             elif enddate == "":
-                self.cur.execute("SELECT * FROM maksut WHERE maksupvm::date >= %s ORDER BY maksupvm;",(startdate,));
+                self.cur.execute("SELECT nimeke, maksut.hinta, toimituskulut, kaupunki, maksupvm FROM maksut INNER JOIN kirjat ON maksut.kirjat_id = kirjat.kirjat_id WHERE maksupvm::date >= %s ORDER BY maksupvm;",(startdate,));
             else:
-                self.cur.execute("SELECT * FROM maksut WHERE maksupvm BETWEEN %s AND %s ORDER BY maksupvm;",(startdate,enddate));
+                self.cur.execute("SELECT nimeke, maksut.hinta, toimituskulut, kaupunki, maksupvm FROM maksut INNER JOIN kirjat ON maksut.kirjat_id = kirjat.kirjat_id WHERE maksupvm BETWEEN %s AND %s ORDER BY maksupvm;",(startdate,enddate));
 
             data_queries = self.cur.fetchall()
+            self.conn.close()            
             new_data_queries = []
-            new_data_queries.append(data_tuple)
+            new_data_queries.append(data_tuple)           
             for i in range(len(data_queries)):
                 new_data_queries.append(data_queries[i])
-            print(new_data_queries)                
+            print(new_data_queries[2])
+
+            return new_data_queries            
 
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
-        finally:
-            self.conn.close()
-        
-        return new_data_queries
+            print("Something went wrong")     
     
     def update_payment(self, payment_id, price, postage, location, date):
         #payment_id, title_id, price, postage, location, date
@@ -254,7 +246,7 @@ class Databases():
             self.cur.execute("SELECT hinta, toimituskulut, kaupunki, maksupvm FROM maksut WHERE maksut_id = %s;", (payment_id,));
             old_payment_values = self.cur.fetchall()[0]            
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         finally:
             self.conn.close()  
 
@@ -277,7 +269,7 @@ class Databases():
             self.conn.commit()
             self.conn.close()            
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         finally:
             self.conn.close()
                                   
@@ -293,15 +285,15 @@ class Databases():
             self.cur.execute("DELETE FROM maksut WHERE maksut_id = %s RETURNING maksut_id;",(payment_id,));
             id = self.cur.fetchone()[0]
             self.conn.commit()            
-            print(uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully deleted from the database"))            
+            uimethods.UiMethods.showinfo_messagebox("","Info", f"Payment transaction: {id} was succesfully deleted from the database")            
         except pg2.errors.InvalidTextRepresentation:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"{payment_id} isn't a numeric value!"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", f"{payment_id} isn't a numeric value!")
         except TypeError:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", f"Payment id: {payment_id} was not found from the database."))
+            uimethods.UiMethods.showinfo_messagebox("","Error", f"Payment id: {payment_id} was not found from the database.")
         except pg2.errors.NumericValueOutOfRange:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range."))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Index out of range.")
         except:
-            print(uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong"))
+            uimethods.UiMethods.showinfo_messagebox("","Error", "Something went wrong")
         finally:
             self.conn.close()   
                    

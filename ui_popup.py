@@ -2,112 +2,124 @@ from uimethods import UiMethods
 from databases import Databases
 import tksheet
 from tkinter import *
+import uimethods
 import tkinter as tk
 
 class UiPopUp():
     def query_ui(self, title,author,category,isbn,price):
 
-        data = Databases()               
+        data = Databases()
+        try:
+            table = data.query_from_database(title,author,category,isbn,price)               
+            if table is None:
+                uimethods.UiMethods.showinfo_messagebox("","Info", "No results found!")
+            if table is not None:
+                #Pop menu for queries
+                queryUi = tk.Tk()
+                queryUi.title('Kyselyn tulos')     
+                queryUi.grid_columnconfigure(0, weight = 1)
+                queryUi.grid_rowconfigure(0, weight = 1)
+                frame = tk.Frame(queryUi)
+                frame.grid_columnconfigure(0,weight=1)
+                frame.grid_rowconfigure(0,weight=1)
 
-        #Pop menu for queries
-        queryUi = tk.Tk()
-        queryUi.title('Kyselyn tulos')     
-        queryUi.grid_columnconfigure(0, weight = 1)
-        queryUi.grid_rowconfigure(0, weight = 1)
-        frame = tk.Frame(queryUi)
-        frame.grid_columnconfigure(0,weight=1)
-        frame.grid_rowconfigure(0,weight=1)
+                print(price)              
 
-        print(price)
-                     
-  
-        table = data.query_from_database(title,author,category,isbn,price)
+                sheet = tksheet.Sheet(queryUi)
 
-        sheet = tksheet.Sheet(queryUi)
+                sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
 
-        sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
+                sheet.enable_bindings(("single_select",
 
-        sheet.enable_bindings(("single_select",
+                            "row_select",
 
-                       "row_select",
+                            "column_width_resize",
 
-                       "column_width_resize",
+                            "arrowkeys",
 
-                       "arrowkeys",
+                            "right_click_popup_menu",
 
-                       "right_click_popup_menu",
+                            "rc_select",
 
-                       "rc_select",
+                            "rc_insert_row",
 
-                       "rc_insert_row",
+                            "rc_delete_row",
 
-                       "rc_delete_row",
+                            "copy",
 
-                       "copy",
+                            "cut",
 
-                       "cut",
+                            "paste",
 
-                       "paste",
+                            "delete",
 
-                       "delete",
+                            "undo",
 
-                       "undo",
+                            "edit_cell"))
 
-                       "edit_cell"))
-
-        sheet.grid(row = 0, column = 0, sticky = "nswe") 
-  
-        queryUi.mainloop()
+                sheet.grid(row = 0, column = 0, sticky = "nswe") 
+        
+                queryUi.mainloop()
+        except:
+            print("Something went wrong")
     
     def transactions_menu (self,startDate,endDate):
 
         data = Databases()
-    
-        transactions_ui = tk.Tk()
-        transactions_ui.title('Kyselyn tulos')     
-        transactions_ui.grid_columnconfigure(0, weight = 1)
-        transactions_ui.grid_rowconfigure(0, weight = 1)
-        frame = tk.Frame(transactions_ui)
-        frame.grid_columnconfigure(0,weight=1)
-        frame.grid_rowconfigure(0,weight=1)             
-  
-        table = data.get_payment_transactions(startDate, endDate)
 
-        sheet = tksheet.Sheet(transactions_ui)
+        #table = ""
 
-        sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
+        try:
+            table = data.get_payment_transactions(startDate, endDate)
+            print("Table on: ", table)
+            if table is None:
+                uimethods.UiMethods.showinfo_messagebox("","Info", "No results found!")
+            if table is not None:
+                transactions_ui = tk.Tk()
+                transactions_ui.title('Kyselyn tulos')     
+                transactions_ui.grid_columnconfigure(0, weight = 1)
+                transactions_ui.grid_rowconfigure(0, weight = 1)
+                frame = tk.Frame(transactions_ui)
+                frame.grid_columnconfigure(0,weight=1)
+                frame.grid_rowconfigure(0,weight=1)          
+        
+                sheet = tksheet.Sheet(transactions_ui)
 
-        sheet.enable_bindings(("single_select",
+                sheet.set_sheet_data([[name for name in table[ri]] for ri in range(len(table))])  
 
-                       "row_select",
+                sheet.enable_bindings(("single_select",
 
-                       "column_width_resize",
+                            "row_select",
 
-                       "arrowkeys",
+                            "column_width_resize",
 
-                       "right_click_popup_menu",
+                            "arrowkeys",
 
-                       "rc_select",
+                            "right_click_popup_menu",
 
-                       "rc_insert_row",
+                            "rc_select",
 
-                       "rc_delete_row",
+                            "rc_insert_row",
 
-                       "copy",
+                            "rc_delete_row",
 
-                       "cut",
+                            "copy",
 
-                       "paste",
+                            "cut",
 
-                       "delete",
+                            "paste",
 
-                       "undo",
+                            "delete",
 
-                       "edit_cell"))
+                            "undo",
 
-        sheet.grid(row = 0, column = 0, sticky = "nswe") 
-  
-        transactions_ui.mainloop()
+                            "edit_cell"))
+
+                sheet.grid(row = 0, column = 0, sticky = "nswe") 
+        
+                transactions_ui.mainloop()
+        except:
+            print("Something went wrong")
 
 
 
