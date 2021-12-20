@@ -5,8 +5,7 @@ class UserInterface():
 
     def __init__(self,title,resolution):        
         self.title = title
-        self.resolution = resolution
-        
+        self.resolution = resolution        
     
     def mainLoop(self):
         self.window.mainloop()
@@ -15,7 +14,8 @@ class UserInterface():
         self.window = tk.Tk() 
         self.window.title(self.title)      
         self.window.geometry(self.resolution)
-    
+        
+    #For testing
     def gridConfigure(self):
         self.window.grid_columnconfigure(0, weight = 1)
         self.window.grid_rowconfigure(0, weight = 1)

@@ -91,7 +91,7 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         self.addAmount = StringVar(self.window)
         self.addExtraInformation = StringVar(self.window)             
         self.tkAddPrice = StringVar(self.window)
-        self.removetitle = StringVar(self.window)
+        self.tkTitleId = StringVar(self.window)
         
 
         self.remove_widgets(self.frame, self.frame2, self.frame3)   
@@ -183,21 +183,21 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         price_entry.grid(row=13, column=1, sticky=tk.E, padx=5, pady=5)
 
         add_button = tk.Button(self.frame, text="Lisää nimeke", command=lambda: self.data.add_to_database(self.tkAddTitle.get(),self.tkAddAuthor.get(),self.tkAddISBN.get(),self.tkAddCategory.get(),self.tkAddPublisher.get(),self.tkAddLanguages.get(),self.tkAddPublishYear.get(),self.tkAddEdition.get(),self.tkAddPages.get(),self.addTypography.get(),self.addCondition.get(),self.addAmount.get(),self.addExtraInformation.get(),self.tkAddPrice.get()))
-        add_button.grid(row=13, column=2, sticky=tk.E, padx=5, pady=5)        
-
-        modify_button = tk.Button(self.frame, text="Muokkaa nimekettä")
-        modify_button.grid(row=13, column=3, sticky=tk.E, padx=5, pady=5)
+        add_button.grid(row=13, column=2, sticky=tk.E, padx=5, pady=5)    
         
         #Remove a title entry
 
         title_id_label = tk.Label(self.frame2, text="Nimeke ID:")
         title_id_label.grid(row=0, column=0, padx=5, pady=5)
         
-        title_id_entry = tk.Entry(self.frame2, textvariable=self.removetitle)
+        title_id_entry = tk.Entry(self.frame2, textvariable=self.tkTitleId)
         title_id_entry.grid(row=0, column=1, padx=5,pady=5)
 
-        remove_title_button = tk.Button(self.frame2, text="Poista nimeke", command= lambda: self.data.delete_title_from_books(self.removetitle.get()))
+        remove_title_button = tk.Button(self.frame2, text="Poista nimeke", command= lambda: self.data.delete_title_from_books(self.tkTitleId))
         remove_title_button.grid(row=0, column=2, sticky=tk.E, padx=5, pady=5)
+
+        modify_button = tk.Button(self.frame2, text="Muokkaa nimeke", command = lambda: self.data.update_title(self.tkTitleId.get(),self.tkAddTitle.get(),self.tkAddAuthor.get(),self.tkAddISBN.get(),self.tkAddCategory.get(),self.tkAddPublisher.get(),self.tkAddLanguages.get(),self.tkAddPublishYear.get(),self.tkAddEdition.get(),self.tkAddPages.get(),self.addTypography.get(),self.addCondition.get(),self.addAmount.get(),self.addExtraInformation.get(),self.tkAddPrice.get()))
+        modify_button.grid(row=0, column=3, sticky=tk.E, padx=5, pady=5)
     
     def queries_ui(self):
 
@@ -276,13 +276,13 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         self.tkPayDate = StringVar(self.window)
         self.tkPayStartDate = StringVar(self.window)
         self.tkPayEndDate = StringVar(self.window)
-        self.tkPayTransactionId = StringVar(self.window)      
+        self.tkPayTransactionId = StringVar(self.window)                    
 
         self.remove_widgets(self.frame, self.frame2, self.frame3)       
   
         self.frame2.grid(row = 2, column = 0, sticky = W+E+N+S,padx=10, pady=10)
-        self.frame3.grid(row = 3, column = 0, sticky = W+E+N+S,padx=10, pady=10)
-
+        self.frame3.grid(row = 3, column = 0, sticky = W+E+N+S,padx=10, pady=10)    
+    
         title_id_label = tk.Label(self.frame, text="Nimeke id:")
         title_id_label.grid(row=0, column=0, padx=5, pady=5)
 
@@ -311,13 +311,10 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         payment_date_label.grid(row=4, column=0, padx=5, pady=5)
 
         payment_date_entry = tk.Entry(self.frame,textvariable=self.tkPayDate)
-        payment_date_entry.grid(row=4, column=1, padx=5,pady=5)
+        payment_date_entry.grid(row=4, column=1, padx=5,pady=5)        
 
         payment_add_button = tk.Button(self.frame, text="Lisää maksutapahtuma", command= lambda: self.data.add_payment_to_database(self.tkPayTitleId.get(), self.tkPayPrice.get(), self.tkPayPostage.get(), self.tkPayLocation.get(), self.tkPayDate.get()))
-        payment_add_button.grid(row=4, column=2, padx=5, pady=5)
-
-        payment_modify_button = tk.Button(self.frame, text="Muokkaa maksutapahtumaa")
-        payment_modify_button.grid(row=4, column=3, padx=5, pady=5)        
+        payment_add_button.grid(row=4, column=2, padx=5, pady=5)                
 
         #Get payment transactions
 
@@ -336,7 +333,7 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         get_payments_button = tk.Button(self.frame2, text="Hae maksutapahtumat", command= lambda: self.PopUp.transactions_menu(self.tkPayStartDate.get(), self.tkPayEndDate.get()))
         get_payments_button.grid(row=1, column=2, padx=5, pady=5)
 
-        #Delete payment transactions
+        #Delete and modify payment's transactions
 
         transaction_id_label = tk.Label(self.frame3, text="Maksu ID:")
         transaction_id_label.grid(row=0, column=0, padx=5, pady=5)
@@ -345,4 +342,7 @@ class UiMenus(UserInterface, UiMethods, UiPopUp):
         transaction_id_entry.grid(row=0, column=1, padx=5,pady=5)
 
         payment_delete_button = tk.Button(self.frame3, text="Poista maksutapahtuma", command= lambda: self.data.delete_from_payments(self.tkPayTransactionId.get()))
-        payment_delete_button.grid(row=0, column=2, padx=5, pady=5) 
+        payment_delete_button.grid(row=0, column=2, padx=5, pady=5)
+
+        payment_modify_button = tk.Button(self.frame3, text="Muokkaa maksutapahtumaa",command = lambda: self.data.update_payment(self.tkPayTransactionId.get(), self.tkPayPrice.get(), self.tkPayPostage.get(), self.tkPayLocation.get(), self.tkPayDate.get()))
+        payment_modify_button.grid(row=0, column=3, padx=5, pady=5) 
